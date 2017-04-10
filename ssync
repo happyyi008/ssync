@@ -1,0 +1,40 @@
+#!/bin/bash
+
+syncroot=$1
+remoteroot=$2
+remote=$3
+
+[ -z "$syncroot" ] && syncroot="."
+
+if [ "$syncroot" == "." ]
+then
+    syncroot=`pwd`
+    echo $syncroot
+fi
+
+modified=`stat -c %Y $syncroot`
+
+function copyfolder() {
+    echo $syncroot
+    echo $remote
+    echo $remoteroot
+    echo "syncing folder"
+    scp $syncroot "${remote}:${remoteroot}"
+    echo "finished syncing"    
+}
+
+function checkChanged() {
+    modified_now=`stat -c %Y $syncroot`
+    if [ "$modified" -eq "$modified_now" ]
+    then
+        return 0
+    fi
+    copyfolder
+    modified=$modified_now
+}
+
+while true
+do
+    checkChanged
+    sleep 5
+done
