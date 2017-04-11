@@ -2,7 +2,7 @@
 
 syncroot=$1
 remoteroot=$2
-remote=$3
+remotes=$3
 
 [ -z "$syncroot" ] && syncroot="."
 
@@ -16,10 +16,13 @@ modified=`stat -c %Y $syncroot`
 
 function copyfolder() {
     echo $syncroot
-    echo $remote
     echo $remoteroot
-    echo "syncing folder"
-    scp $syncroot "${remote}:${remoteroot}"
+
+    for remote in $remotes
+    do
+        echo "syncing to $remote"
+        scp $syncroot "${remote}:${remoteroot}"
+    done
     echo "finished syncing"    
 }
 
