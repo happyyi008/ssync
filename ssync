@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# usage
 # ssync syncfile/ remotefile/ root@remote root@remote2
 
 syncroot=`eval "echo $1"`
@@ -7,26 +8,32 @@ remoteroot=$2
 shift 2
 remotes="$@"
 
-
 [ -z "$syncroot" ] && syncroot="."
 
 if [ "$syncroot" == "." ]
 then
     syncroot=`pwd`
-    echo $syncroot
 fi
 
 modified=`stat -c %Y ${syncroot}`
 
-function copyfolder() {
-    echo $syncroot
-    echo $remoteroot
+function init() {
+    echo "copying ssh public key to remote"
+    for remote in $remotes
+    do
+        ssh-copy-id $remote
+        [ $? -ne 0 ] echo "failed copying ssh key to $remote"
+    done
+    echo "finished init process"
+}
 
+function copyfolder() {
+    echo "begin sync cycle"
     for remote in $remotes
     do
         echo "syncing to $remote:${remoteroot}"
         scp $syncroot "${remote}:${remoteroot}"
-
+        [ $? -ne 0 ] && echo "failed sycning to syncing to $remote:${remoteroot}"
     done
 
     echo "finished syncing"    
@@ -41,6 +48,8 @@ function checkChanged() {
     copyfolder
     modified=$modified_now
 }
+
+init
 
 while true
 do
