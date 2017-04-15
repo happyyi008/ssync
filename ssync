@@ -1,8 +1,12 @@
 #!/bin/bash
 
-syncroot=$1
+# ssync syncfile/ remotefile/ root@remote root@remote2
+
+syncroot=`eval "echo $1"`
 remoteroot=$2
-remotes=$3
+shift 2
+remotes="$@"
+
 
 [ -z "$syncroot" ] && syncroot="."
 
@@ -12,7 +16,7 @@ then
     echo $syncroot
 fi
 
-modified=`stat -c %Y $syncroot`
+modified=`stat -c %Y ${syncroot}`
 
 function copyfolder() {
     echo $syncroot
@@ -20,9 +24,11 @@ function copyfolder() {
 
     for remote in $remotes
     do
-        echo "syncing to $remote"
+        echo "syncing to $remote:${remoteroot}"
         scp $syncroot "${remote}:${remoteroot}"
+
     done
+
     echo "finished syncing"    
 }
 
@@ -39,5 +45,5 @@ function checkChanged() {
 while true
 do
     checkChanged
-    sleep 5
+    sleep 3
 done
