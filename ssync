@@ -8,6 +8,14 @@ remoteroot=$2
 shift 2
 remotes="$@"
 
+exit_script() {
+    echo "Exiting ssync"
+    trap - SIGINT SIGTERM
+    kill -- -$$
+}
+
+trap exit_script SIGINT SIGINT
+
 if [ ! -e "$syncroot" ]
 then
     echo "error: local file ¬∃"
@@ -33,7 +41,7 @@ function copyfolder() {
     do
         echo "syncing to $remote:$remoteroot"
         scp $syncroot "$remote:$remoteroot"
-        [ $? -ne 0 ] && echo "failed sycning to syncing to $remote:$remoteroot"
+        [ $? -ne 0 ] && echo "failed sycning to $remote:$remoteroot"
     done
 
     echo "finished syncing"    
