@@ -23,7 +23,7 @@ then
     exit 1
 fi
 
-modified=`stat -c %Y $syncroot`
+modified=`stat -c %Y $(find $syncroot -type f)`
 
 function init() {
     echo "copying ssh public key to remote"
@@ -40,7 +40,8 @@ function copyfolder() {
     for remote in $remotes
     do
         echo "syncing to $remote:$remoteroot"
-        scp $syncroot "$remote:$remoteroot"
+        echo "$syncroot"
+        scp -r "$syncroot" "$remote:$remoteroot"
         [ $? -ne 0 ] && echo "failed sycning to $remote:$remoteroot"
     done
 
@@ -48,8 +49,8 @@ function copyfolder() {
 }
 
 function checkChanged() {
-    modified_now=`stat -c %Y $syncroot`
-    if [ "$modified" -eq "$modified_now" ]
+    modified_now=`stat -c %Y $(find $syncroot -type f)`
+    if [ "$modified" == "$modified_now" ]
     then
         return 0
     fi
